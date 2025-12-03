@@ -1,7 +1,15 @@
 import { query } from "../utils/connectToDB.js"
+import {
+    createEmployeeQuery,
+    createEmployeeTableQuery,
+    createRoleQuery,
+    getAllEmployeeQuery
+} from "../utils/sqlQuery.js";
+
+import { createError } from "../utils/error.js";
 
 
-export async function  getAllEmployees(req, res, next) {
+export async function  getAllEmployee(req, res, next) {
 
     try{
         const response = await query(`
@@ -11,28 +19,64 @@ export async function  getAllEmployees(req, res, next) {
 
 
         console.log(response);
-        res.send("ok")
+        if(!response.rows[0].to_regclass){
+            await query( createRoleQuery)
+            await query(createEmployeeTableQuery)
+        }
+        const { rows } = await query(getAllEmployeeQuery);
+        res.status(200).json(rows);
 
 
-    }catch (e) {
+    }catch (error) {
+        console.log(error.message)
+        return next(createError(400, "couldn't get employee details"))
+
 
     }
 
 }
 
-export async function  getEmployees(req, res, next) {
+
+export async function createEmployee(req, res, next) {
+    try {
+        const { name, email, role, age, salary } = req.body;
+
+        if (!name || !email  || !role || !age ||  !salary  ) {
+            return res.status(400).json({ error: 'Missing fields' });
+        }
+
+        const data = await query(createEmployeeQuery, [
+            name,
+            email,
+            role,
+            age,
+            salary
+
+        ]);
+
+        res.status(201).json(data.rows[0]);
+
+    } catch (error) {
+        console.log(error.message);
+        return next(createError(400, error.message));
+    }
+}
+
+
+
+
+
+export async function  getEmployee(req, res, next) {
 
 }
 
-export async function  deleteEmployees(req, res, next) {
+export async function  deleteEmployee(req, res, next) {
 
 }
 
-export async function  updateEmployees(req, res, next) {
+export async function  updateEmployee(req, res, next) {
 
 }
 
-export async function  createEmployees(req, res, next) {
 
-}
 

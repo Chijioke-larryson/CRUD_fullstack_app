@@ -23,6 +23,9 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/employee", employee);
+app.use(function(req,res){
+    res.status(400).json({error: "Not Found"})
+})
 app.use((err, req, res, next) => {
     const statusCode = err.statusCode || 500;
     const message  = err.message  || "internal server error "
